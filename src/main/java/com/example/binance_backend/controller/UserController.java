@@ -1,41 +1,59 @@
 package com.example.binance_backend.controller;
 
+import com.example.binance_backend.dto.SignUpRequest;
+import com.example.binance_backend.dto.SignUpResponse;
 import com.example.binance_backend.model.User;
 import com.example.binance_backend.repository.UserRepository;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCrypt;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.OffsetDateTime;
-import java.util.UUID;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-  private final UserRepository repo;
-  public UserController(UserRepository repo) { this.repo = repo; }
 
-  @GetMapping("/{id}")
-  public User get(@PathVariable UUID id) {
-    return repo.findById(id)
-               .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-  }
+    private final UserRepository userRepo;
 
-  @PostMapping
-  public User create(@RequestBody User u) {
-    OffsetDateTime now = OffsetDateTime.now();
-    u.setCreatedAt(now);
-    u.setUpdatedAt(now);
-    return repo.save(u);
-  }
+    public UserController(UserRepository userRepo) {
+        this.userRepo = userRepo;
+    }
 
-  @PutMapping("/{id}")
-  public User update(@PathVariable UUID id, @RequestBody User u) {
-    User exist = repo.findById(id)
-                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-    u.setId(id);
-    u.setCreatedAt(exist.getCreatedAt());
-    u.setUpdatedAt(OffsetDateTime.now());
-    return repo.save(u);
-  }
+    @PostMapping
+    public ResponseEntity<?> signup(@RequestBody SignUpRequest req) {
+        Map<String,String> errors = new HashMap<>();
+
+        if (userRepo.existsByEmail(req.getEmail())) {
+            errors.put("email", "Email já cadastrado");
+        }
+        if (userRepo.existsByUsername(req.getUsername())) {
+            errors.put("username", "Nome de usuário já cadastrado");
+        }
+        if (!errors.isEmpty()) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(errors);
+        }
+
+        // Só crio o User na tabela app_user
+        User user = new User();
+        user.setEmail(req.getEmail());
+        user.setUsername(req.getUsername());
+        user.setPasswordHash(  // se quiser já guardar a hash na mesma tabela
+            BCrypt.hashpw(req.getPassword(), BCrypt.gensalt())
+        );
+        user = userRepo.save(user);
+
+        SignUpResponse resp = new SignUpResponse(
+            user.getId().toString(),
+            user.getUsername()
+        );
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(resp);
+    }
 }

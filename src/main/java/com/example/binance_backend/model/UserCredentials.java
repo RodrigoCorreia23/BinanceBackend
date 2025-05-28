@@ -1,3 +1,4 @@
+// src/main/java/com/example/binance_backend/model/UserCredentials.java
 package com.example.binance_backend.model;
 
 import jakarta.persistence.*;
@@ -14,6 +15,9 @@ public class UserCredentials {
 
     @Column(name = "user_id", nullable = false)
     private UUID userId;
+
+    @Column(name = "password_hash", nullable = false)
+    private String passwordHash;
 
     @Column(name = "encrypted_api_key", nullable = false)
     private String encryptedApiKey;
@@ -34,6 +38,9 @@ public class UserCredentials {
 
     public UUID getUserId() { return userId; }
     public void setUserId(UUID userId) { this.userId = userId; }
+
+    public String getPasswordHash() { return passwordHash; }
+    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
 
     public String getEncryptedApiKey() { return encryptedApiKey; }
     public void setEncryptedApiKey(String encryptedApiKey) { this.encryptedApiKey = encryptedApiKey; }
