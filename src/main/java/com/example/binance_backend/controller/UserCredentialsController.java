@@ -60,4 +60,17 @@ public class UserCredentialsController {
         // 3) devolve 201 Created sem corpo
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
+    @GetMapping("/{userId}")
+public ResponseEntity<?> hasCredentials(@PathVariable String userId) {
+    UUID id;
+    try {
+        id = UUID.fromString(userId);
+    } catch (IllegalArgumentException ex) {
+        return ResponseEntity.badRequest().body(Map.of("message", "ID inválido"));
+    }
+    boolean exists = credRepo.findByUserId(id).isPresent();
+    return ResponseEntity.ok(Map.of("hasCredentials", exists));
+}
+
 }
