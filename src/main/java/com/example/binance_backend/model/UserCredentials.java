@@ -1,4 +1,3 @@
-// src/main/java/com/example/binance_backend/model/UserCredentials.java
 package com.example.binance_backend.model;
 
 import jakarta.persistence.*;
@@ -16,9 +15,6 @@ public class UserCredentials {
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 
-    @Column(name = "password_hash", nullable = false)
-    private String passwordHash;
-
     @Column(name = "encrypted_api_key", nullable = false)
     private String encryptedApiKey;
 
@@ -31,26 +27,47 @@ public class UserCredentials {
     @Column(name = "rotated_at")
     private OffsetDateTime rotatedAt;
 
-    // getters & setters
+    // ===== getters & setters =====
 
-    public UUID getId() { return id; }
-    public void setId(UUID id) { this.id = id; }
+    public UUID getId() {
+        return id;
+    }
+    public void setId(UUID id) {
+        this.id = id;
+    }
 
-    public UUID getUserId() { return userId; }
-    public void setUserId(UUID userId) { this.userId = userId; }
+    public UUID getUserId() {
+        return userId;
+    }
+    public void setUserId(UUID userId) {
+        this.userId = userId;
+    }
 
-    public String getPasswordHash() { return passwordHash; }
-    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
+    public String getEncryptedApiKey() {
+        return encryptedApiKey;
+    }
+    public void setEncryptedApiKey(String encryptedApiKey) {
+        this.encryptedApiKey = encryptedApiKey;
+    }
 
-    public String getEncryptedApiKey() { return encryptedApiKey; }
-    public void setEncryptedApiKey(String encryptedApiKey) { this.encryptedApiKey = encryptedApiKey; }
+    public String getEncryptedSecretKey() {
+        return encryptedSecretKey;
+    }
+    public void setEncryptedSecretKey(String encryptedSecretKey) {
+        this.encryptedSecretKey = encryptedSecretKey;
+    }
 
-    public String getEncryptedSecretKey() { return encryptedSecretKey; }
-    public void setEncryptedSecretKey(String encryptedSecretKey) { this.encryptedSecretKey = encryptedSecretKey; }
+    public OffsetDateTime getCreatedAt() {
+        return createdAt;
+    }
+    public void setCreatedAt(OffsetDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
 
-    public OffsetDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
-
-    public OffsetDateTime getRotatedAt() { return rotatedAt; }
-    public void setRotatedAt(OffsetDateTime rotatedAt) { this.rotatedAt = rotatedAt; }
+    public OffsetDateTime getRotatedAt() {
+        return rotatedAt;
+    }
+    public void setRotatedAt(OffsetDateTime rotatedAt) {
+        this.rotatedAt = rotatedAt;
+    }
 }
