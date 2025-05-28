@@ -1,12 +1,9 @@
-// src/main/java/com/example/binance_backend/controller/AuthController.java
 package com.example.binance_backend.controller;
 
 import com.example.binance_backend.dto.LoginRequest;
 import com.example.binance_backend.dto.LoginResponse;
 import com.example.binance_backend.model.User;
-import com.example.binance_backend.model.UserCredentials;
 import com.example.binance_backend.repository.UserRepository;
-import com.example.binance_backend.repository.UserCredentialsRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCrypt;
@@ -20,32 +17,32 @@ import java.util.Optional;
 public class AuthController {
 
     private final UserRepository userRepo;
-    private final UserCredentialsRepository credRepo;
 
-    public AuthController(UserRepository userRepo,
-                          UserCredentialsRepository credRepo) {
+    public AuthController(UserRepository userRepo) {
         this.userRepo = userRepo;
-        this.credRepo = credRepo;
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest req) {
+        // 1) tenta carregar usuário por e-mail
         Optional<User> userOpt = userRepo.findByEmail(req.getEmail());
         if (userOpt.isEmpty()) {
+            // retorna 404 + {"email":"Email não cadastrado"}
             return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("message", "Credenciais inválidas"));
+                .status(HttpStatus.NOT_FOUND)
+                .body(Map.of("email", "Email não cadastrado"));
         }
         User user = userOpt.get();
 
-        Optional<UserCredentials> credOpt = credRepo.findByUserId(user.getId());
-        if (credOpt.isEmpty() ||
-            !BCrypt.checkpw(req.getPassword(), credOpt.get().getPasswordHash())) {
+        // 2) compara senha crua com hash
+        if (!BCrypt.checkpw(req.getPassword(), user.getPasswordHash())) {
+            // retorna 401 + {"password":"Senha incorreta"}
             return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("message", "Credenciais inválidas"));
+                .body(Map.of("password", "Senha incorreta"));
         }
 
+        // 3) sucesso
         LoginResponse resp = new LoginResponse(
             user.getId().toString(),
             user.getUsername()
