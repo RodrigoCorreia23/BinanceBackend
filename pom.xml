@@ -6,50 +6,55 @@
                         https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
+
+  <!-- Herdado do Spring Boot Starter Parent (versão 3.4.5) -->
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
     <version>3.4.5</version>
-    <relativePath/>
+    <relativePath/> 
   </parent>
 
   <groupId>com.example</groupId>
   <artifactId>binance-backend</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <name>binance-backend</name>
-  <description>Demo project for Spring Boot</description>
+  <description>Backend Spring Boot para integração com API Binance</description>
 
   <properties>
+    <!-- Java 17, compatível com Spring Boot 3.4.x -->
     <java.version>17</java.version>
   </properties>
 
   <dependencies>
-    <!-- Spring Boot Actuator -->
+    <!-- ===== 1) Spring Boot Core ===== -->
+
+    <!-- Spring Boot Actuator (endpoints de métricas / healthchecks) -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-actuator</artifactId>
     </dependency>
 
-    <!-- Spring Data JPA -->
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-data-jpa</artifactId>
-    </dependency>
-
-    <!-- Spring Web MVC / REST -->
+    <!-- Spring Web MVC / REST (Tomcat + Spring MVC) -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
 
-    <!-- PostgreSQL JDBC Driver -->
+    <!-- Spring Data JPA (Hibernate) -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+
+    <!-- PostgreSQL JDBC Driver (runtime para conexão com o banco) -->
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
       <scope>runtime</scope>
     </dependency>
 
-    <!-- Lombok -->
+    <!-- Lombok (reduz boilerplate: @Getter, @Setter, @Builder etc.) -->
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
@@ -57,28 +62,37 @@
       <scope>provided</scope>
     </dependency>
 
-    <!-- Spring Security Crypto (para hashing, se necessário) -->
+    <!-- Spring Security Crypto (para hashing/salting de senhas, se necessário) -->
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-crypto</artifactId>
       <version>6.1.4</version>
     </dependency>
 
-    <!-- OkHttp (HTTP client para BinanceClient) -->
+
+    <!-- ===== 2) Cliente HTTP para chamar Binance ====
+
+         Aqui usamos OkHttp (4.11.0) para montar as requests
+         e Jackson Databind (2.15.2) para parse de JSON da Binance. 
+    -->
+
+    <!-- OkHttp (client HTTP leve e eficiente) -->
     <dependency>
       <groupId>com.squareup.okhttp3</groupId>
       <artifactId>okhttp</artifactId>
       <version>4.11.0</version>
     </dependency>
 
-    <!-- Jackson Databind (JSON parsing) -->
+    <!-- Jackson Databind (converter JSON <-> POJO) -->
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
       <version>2.15.2</version>
     </dependency>
 
-    <!-- Testes -->
+
+    <!-- ===== 3) Testes ===== -->
+
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
@@ -88,13 +102,13 @@
 
   <build>
     <plugins>
-      <!-- Spring Boot Maven Plugin -->
+      <!-- ===== Spring Boot Maven Plugin ===== -->
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
       </plugin>
 
-      <!-- Compiler + Lombok annotation processing -->
+      <!-- ===== Compiler Plugin + Annotation Processor (Lombok) ===== -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
