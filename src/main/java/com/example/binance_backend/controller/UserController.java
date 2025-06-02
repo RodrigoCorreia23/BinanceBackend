@@ -23,15 +23,15 @@ public class UserController {
         this.userRepo = userRepo;
     }
 
-    @PostMapping
+    @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody SignUpRequest req) {
         Map<String,String> errors = new HashMap<>();
 
         if (userRepo.existsByEmail(req.getEmail())) {
-            errors.put("email", "Email já cadastrado");
+            errors.put("email", "Email já existe");
         }
         if (userRepo.existsByUsername(req.getUsername())) {
-            errors.put("username", "Nome de usuário já cadastrado");
+            errors.put("username", "Nome de utilizador já existe.");
         }
         if (!errors.isEmpty()) {
             return ResponseEntity
