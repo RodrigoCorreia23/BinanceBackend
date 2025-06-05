@@ -45,7 +45,8 @@ public class AuthController {
         // 3) sucesso
         LoginResponse resp = new LoginResponse(
             user.getId().toString(),
-            user.getUsername()
+            user.getUsername(),
+            user.getEmail()
         );
         return ResponseEntity.ok(resp);
     }
