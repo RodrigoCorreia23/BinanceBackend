@@ -1,92 +1,45 @@
-package com.example.binance_backend.model;
+package com.example.binance_backend.dto;
 
-import jakarta.persistence.*;
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
 import java.util.UUID;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import jakarta.validation.constraints.NotNull;
 
-@Entity
-@Table(name = "bot_settings")
-public class BotSettings {
+/**
+ * DTO para receber JSON de BotSettings no controller.
+ */
+public class BotSettingsRequest {
 
-    @Id
-    @GeneratedValue
-    private UUID id;
+    @NotNull
+    private UUID userId;
 
-    // <<< Relacionamento ManyToOne para User >>>
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(
-        name = "user_id",
-        nullable = false,
-        foreignKey = @ForeignKey(name = "fk_bot_settings_user")
-    )
-    private User user;
-
-    @Column(name = "trading_pair", nullable = false)
+    @NotNull
     private String tradingPair;
 
-    @Column(name = "order_type", nullable = false)
+    @NotNull
     private String orderType;
 
-    @Column(name = "trade_amount", precision = 16, scale = 8)
+    @NotNull
     private BigDecimal tradeAmount;
 
-    @Column(name = "limit_price", precision = 16, scale = 8)
     private BigDecimal limitPrice;
+    private BigDecimal stopPrice;
+    private BigDecimal trailingDelta;
 
-    // ================================
-    // >>> NOVOS CAMPOS para ORDERS <<<
-    // ================================
-    @Column(name = "stop_price", precision = 16, scale = 8)
-    private BigDecimal stopPrice;         // usado em Stop-Limit ou Stop Market
-
-    @Column(name = "trailing_delta", precision = 5, scale = 2)
-    private BigDecimal trailingDelta;     // ex: 1.5 (%) para trailing stop
-
-    // ================================
-
-    @Column(name = "stop_loss_perc", precision = 5, scale = 2)
     private BigDecimal stopLossPerc;
-
-    @Column(name = "take_profit_perc", precision = 5, scale = 2)
     private BigDecimal takeProfitPerc;
 
-    @Column(name = "rsi_enabled", nullable = false)
     private boolean rsiEnabled;
-
-    @Column(name = "rsi_threshold")
     private Integer rsiThreshold;
-
-    @Column(name = "macd_enabled", nullable = false)
     private boolean macdEnabled;
-
-    @Column(name = "moving_avg_enabled", nullable = false)
     private boolean movingAvgEnabled;
 
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private OffsetDateTime createdAt;
+    // Getters e Setters
 
-    @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
-    private OffsetDateTime updatedAt;
-
-    // ======= GETTERS & SETTERS =======
-
-    public UUID getId() {
-        return id;
+    public UUID getUserId() {
+        return userId;
     }
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public User getUser() {
-        return user;
-    }
-    public void setUser(User user) {
-        this.user = user;
+    public void setUserId(UUID userId) {
+        this.userId = userId;
     }
 
     public String getTradingPair() {
@@ -171,15 +124,5 @@ public class BotSettings {
     }
     public void setMovingAvgEnabled(boolean movingAvgEnabled) {
         this.movingAvgEnabled = movingAvgEnabled;
-    }
-
-    public OffsetDateTime getCreatedAt() {
-        return createdAt;
-    }
-    public OffsetDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-    public void setUpdatedAt(OffsetDateTime updatedAt) {
-        this.updatedAt = updatedAt;
     }
 }

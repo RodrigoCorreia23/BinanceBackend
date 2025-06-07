@@ -1,6 +1,9 @@
 package com.example.binance_backend.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -13,8 +16,14 @@ public class BotTrade {
     @GeneratedValue
     private UUID id;
 
-    @Column(name = "user_id", nullable = false)
-    private UUID userId;
+    // <<< Relacionamento ManyToOne para User >>>
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(
+        name = "user_id",
+        nullable = false,
+        foreignKey = @ForeignKey(name = "fk_bot_trade_user")
+    )
+    private User user;
 
     @Column(nullable = false)
     private String symbol;
@@ -37,50 +46,98 @@ public class BotTrade {
     @Column(nullable = false)
     private String status;
 
-    @Column(name = "created_at", nullable = false)
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
 
     @Column(name = "executed_at")
     private OffsetDateTime executedAt;
 
+    @UpdateTimestamp
     @Column(name = "updated_at")
     private OffsetDateTime updatedAt;
 
-    // getters & setters
+    // ======= GETTERS & SETTERS =======
 
-    public UUID getId() { return id; }
-    public void setId(UUID id) { this.id = id; }
+    public UUID getId() {
+        return id;
+    }
+    public void setId(UUID id) {
+        this.id = id;
+    }
 
-    public UUID getUserId() { return userId; }
-    public void setUserId(UUID userId) { this.userId = userId; }
+    public User getUser() {
+        return user;
+    }
+    public void setUser(User user) {
+        this.user = user;
+    }
 
-    public String getSymbol() { return symbol; }
-    public void setSymbol(String symbol) { this.symbol = symbol; }
+    public String getSymbol() {
+        return symbol;
+    }
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
+    }
 
-    public String getSide() { return side; }
-    public void setSide(String side) { this.side = side; }
+    public String getSide() {
+        return side;
+    }
+    public void setSide(String side) {
+        this.side = side;
+    }
 
-    public BigDecimal getAmount() { return amount; }
-    public void setAmount(BigDecimal amount) { this.amount = amount; }
+    public BigDecimal getAmount() {
+        return amount;
+    }
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
+    }
 
-    public BigDecimal getPrice() { return price; }
-    public void setPrice(BigDecimal price) { this.price = price; }
+    public BigDecimal getPrice() {
+        return price;
+    }
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
 
-    public BigDecimal getFee() { return fee; }
-    public void setFee(BigDecimal fee) { this.fee = fee; }
+    public BigDecimal getFee() {
+        return fee;
+    }
+    public void setFee(BigDecimal fee) {
+        this.fee = fee;
+    }
 
-    public BigDecimal getProfitEstimate() { return profitEstimate; }
-    public void setProfitEstimate(BigDecimal profitEstimate) { this.profitEstimate = profitEstimate; }
+    public BigDecimal getProfitEstimate() {
+        return profitEstimate;
+    }
+    public void setProfitEstimate(BigDecimal profitEstimate) {
+        this.profitEstimate = profitEstimate;
+    }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public String getStatus() {
+        return status;
+    }
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
-    public OffsetDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
+    public OffsetDateTime getCreatedAt() {
+        return createdAt;
+    }
+    // Não há setter para createdAt, pois é automático com @CreationTimestamp
 
-    public OffsetDateTime getExecutedAt() { return executedAt; }
-    public void setExecutedAt(OffsetDateTime executedAt) { this.executedAt = executedAt; }
+    public OffsetDateTime getExecutedAt() {
+        return executedAt;
+    }
+    public void setExecutedAt(OffsetDateTime executedAt) {
+        this.executedAt = executedAt;
+    }
 
-    public OffsetDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(OffsetDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public OffsetDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+    public void setUpdatedAt(OffsetDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 }

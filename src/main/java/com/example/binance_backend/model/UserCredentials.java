@@ -3,17 +3,27 @@ package com.example.binance_backend.model;
 import jakarta.persistence.*;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
-@Table(name = "user_credentials")
+@Table(
+    name = "user_credentials",
+    uniqueConstraints = @UniqueConstraint(columnNames = "user_id")
+)
 public class UserCredentials {
 
     @Id
     @GeneratedValue
     private UUID id;
 
-    @Column(name = "user_id", nullable = false)
-    private UUID userId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(
+        name = "user_id",
+        nullable = false,
+        foreignKey = @ForeignKey(name = "fk_user_credentials_user")
+    )
+    private User user;
 
     @Column(name = "encrypted_api_key", nullable = false)
     private String encryptedApiKey;
@@ -21,13 +31,15 @@ public class UserCredentials {
     @Column(name = "encrypted_secret_key", nullable = false)
     private String encryptedSecretKey;
 
-    @Column(name = "created_at", nullable = false)
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
 
+    @UpdateTimestamp
     @Column(name = "rotated_at")
     private OffsetDateTime rotatedAt;
 
-    // ===== getters & setters =====
+    // ======= GETTERS & SETTERS =======
 
     public UUID getId() {
         return id;
@@ -36,11 +48,11 @@ public class UserCredentials {
         this.id = id;
     }
 
-    public UUID getUserId() {
-        return userId;
+    public User getUser() {
+        return user;
     }
-    public void setUserId(UUID userId) {
-        this.userId = userId;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getEncryptedApiKey() {
@@ -59,9 +71,6 @@ public class UserCredentials {
 
     public OffsetDateTime getCreatedAt() {
         return createdAt;
-    }
-    public void setCreatedAt(OffsetDateTime createdAt) {
-        this.createdAt = createdAt;
     }
 
     public OffsetDateTime getRotatedAt() {

@@ -24,22 +24,40 @@
   </properties>
 
   <dependencies>
-    <!-- Spring Boot Actuator -->
+    <!-- Spring Boot Actuator (monitoramento) -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-actuator</artifactId>
     </dependency>
 
-    <!-- Spring Data JPA -->
+    <!-- Spring Data JPA (Hibernate, repositórios) -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-jpa</artifactId>
     </dependency>
 
-    <!-- Spring Web MVC / REST -->
+    <!-- Spring Web MVC / REST (controllers, @RestController) -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+
+    <!-- Spring WebFlux (WebClient) -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-webflux</artifactId>
+    </dependency>
+
+    <!-- Quartz Scheduler, caso queira usar jobs avançados (você já tem @Scheduled, mas deixo aqui) -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-quartz</artifactId>
+    </dependency>
+
+    <!-- Bean Validation (Hibernate Validator) -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
     </dependency>
 
     <!-- PostgreSQL JDBC Driver -->
@@ -49,33 +67,32 @@
       <scope>runtime</scope>
     </dependency>
 
-    <!-- Lombok -->
+    <!-- Jackson Databind (JSON parsing) -->
     <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
-      <version>1.18.26</version>
-      <scope>provided</scope>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
     </dependency>
 
-    <!-- Spring Security Crypto (para hashing, se necessário) -->
-    <dependency>
-      <groupId>org.springframework.security</groupId>
-      <artifactId>spring-security-crypto</artifactId>
-      <version>6.1.4</version>
-    </dependency>
-
-    <!-- OkHttp (HTTP client para BinanceClient) -->
+    <!-- OkHttp (caso queira usar em alguns trechos, embora WebClient seja suficiente) -->
     <dependency>
       <groupId>com.squareup.okhttp3</groupId>
       <artifactId>okhttp</artifactId>
       <version>4.11.0</version>
     </dependency>
 
-    <!-- Jackson Databind (JSON parsing) -->
+    <!-- Spring Security Crypto (BCrypt, HMAC, etc.) -->
     <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-      <version>2.15.2</version>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-crypto</artifactId>
+      <version>6.1.4</version>
+    </dependency>
+
+    <!-- Lombok (para @Data, @Builder, etc. – se você usar) -->
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>1.18.26</version>
+      <scope>provided</scope>
     </dependency>
 
     <!-- Testes -->
@@ -94,7 +111,7 @@
         <artifactId>spring-boot-maven-plugin</artifactId>
       </plugin>
 
-      <!-- Compiler + Lombok annotation processing -->
+      <!-- Configurações do compilador (Java 17 + Lombok) -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>

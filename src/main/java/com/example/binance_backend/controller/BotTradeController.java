@@ -4,7 +4,6 @@ import com.example.binance_backend.model.BotTrade;
 import com.example.binance_backend.repository.BotTradeRepository;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,7 +24,7 @@ public class BotTradeController {
 
     @PostMapping
     public BotTrade create(@RequestBody BotTrade t) {
-        t.setCreatedAt(OffsetDateTime.now());
+        // `createdAt` é gerado automaticamente por @CreationTimestamp
         return repo.save(t);
     }
 }

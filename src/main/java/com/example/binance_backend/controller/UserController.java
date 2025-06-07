@@ -2,6 +2,7 @@ package com.example.binance_backend.controller;
 
 import com.example.binance_backend.dto.SignUpRequest;
 import com.example.binance_backend.dto.SignUpResponse;
+import com.example.binance_backend.dto.UpdateProfileRequest;
 import com.example.binance_backend.dto.UserProfileResponse;
 import com.example.binance_backend.model.User;
 import com.example.binance_backend.repository.UserRepository;
@@ -9,8 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.web.bind.annotation.*;
-import com.example.binance_backend.dto.UpdateProfileRequest;
-
 
 import java.util.HashMap;
 import java.util.Map;
@@ -43,7 +42,7 @@ public class UserController {
                     .body(errors);
         }
 
-        // Só crio o User na tabela app_user
+        // Cria e salva User
         User user = new User();
         user.setEmail(req.getEmail());
         user.setUsername(req.getUsername());
@@ -137,7 +136,7 @@ public class UserController {
         user.setUsername(novoUsername);
         userRepo.save(user);
 
-        // Retornar o perfil atualizado se quiser
+        // Retornar o perfil atualizado
         UserProfileResponse updatedProfile = new UserProfileResponse(
             user.getId().toString(),
             user.getUsername(),
