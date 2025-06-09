@@ -39,7 +39,7 @@ public class BotSettingsController {
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         if (settingsRepo.findByUser(user).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Configurações já existem para este usuário");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Configuraçoes ja existem para este user");
         }
 
         BotSettings s = new BotSettings();

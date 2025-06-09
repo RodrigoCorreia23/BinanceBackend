@@ -12,10 +12,10 @@ import java.util.*;
 
 /**
  * BinanceClient: encapsula chamadas à API pública e privada da Binance,
- * recebendo as chaves do usuário dinamicamente (criptografadas no banco de dados).
+ * recebendo as chaves do user dinamicamente (criptografadas no banco de dados).
  *
  * - getKlines(...)       → busca candles (klines) públicos.
- * - fetchFreeBalance(...)→ recupera saldo "free" de um asset (ex: USDT) usando credenciais do usuário.
+ * - fetchFreeBalance(...)→ recupera saldo "free" de um asset (ex: USDT) usando credenciais do user.
  * - placeOrder(...)      → envia ordens privadas (MARKET, LIMIT, STOP_LOSS_LIMIT, TRAILING_STOP_MARKET, LIMIT_MAKER)
  *                         usando HMAC-SHA256 para assinatura.
  */
@@ -77,7 +77,7 @@ public class BinanceClient {
     // ============================================================
     /**
      * Recupera o saldo "free" (não usado em ordens) de um determinado asset
-     * (por exemplo, "USDT") para o usuário cujas credenciais foram armazenadas.
+     * (por exemplo, "USDT") para o user cujas credenciais foram armazenadas.
      *
      * @param encryptedApiKey    chave da API cifrada no banco
      * @param encryptedSecretKey secret da API cifrada no banco
@@ -126,7 +126,7 @@ public class BinanceClient {
     // 3) ENVIO DE ORDENS PRIVADAS (BUY/SELL) DINÂMICAS
     // ==================================================
     /**
-     * Envia uma ordem (BUY ou SELL) para a Binance, usando as credenciais do usuário.
+     * Envia uma ordem (BUY ou SELL) para a Binance, usando as credenciais do user.
      * Aceita ordens do tipo:
      * - MARKET
      * - LIMIT
@@ -265,6 +265,6 @@ public class BinanceClient {
         public BigDecimal executedQty;
         public BigDecimal cummulativeQuoteQty;
         public BigDecimal price;
-        // Adicione outros campos do JSON de resposta, se precisar
+        
     }
 }

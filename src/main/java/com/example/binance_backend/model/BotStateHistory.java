@@ -51,7 +51,6 @@ public class BotStateHistory {
     public OffsetDateTime getChangedAt() {
         return changedAt;
     }
-    // não há setter para changedAt, pois é preenchido pelo @CreationTimestamp
 
     public boolean isFromActive() {
         return fromActive;

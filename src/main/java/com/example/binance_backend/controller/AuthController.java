@@ -24,13 +24,13 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest req) {
-        // 1) tenta carregar usuário por e-mail
+        // 1) tenta carregar user por e-mail
         Optional<User> userOpt = userRepo.findByEmail(req.getEmail());
         if (userOpt.isEmpty()) {
-            // retorna 404 + {"email":"Email não cadastrado"}
+            // retorna 404 + {"email":"Email não registado"}
             return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
-                .body(Map.of("email", "Email não cadastrado"));
+                .body(Map.of("email", "Email não registado"));
         }
         User user = userOpt.get();
 
@@ -39,7 +39,7 @@ public class AuthController {
             // retorna 401 + {"password":"Senha incorreta"}
             return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("password", "Senha incorreta"));
+                .body(Map.of("password", "Password incorreta"));
         }
 
         // 3) sucesso

@@ -31,10 +31,10 @@ public class UserController {
         Map<String,String> errors = new HashMap<>();
 
         if (userRepo.existsByEmail(req.getEmail())) {
-            errors.put("email", "Email já existe");
+            errors.put("email", "Email ja existe");
         }
         if (userRepo.existsByUsername(req.getUsername())) {
-            errors.put("username", "Nome de utilizador já existe.");
+            errors.put("username", "Nome de utilizador ja existe.");
         }
         if (!errors.isEmpty()) {
             return ResponseEntity
@@ -68,14 +68,14 @@ public class UserController {
         } catch (IllegalArgumentException ex) {
             return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(Map.of("message", "ID de usuário inválido"));
+                .body(Map.of("message", "ID de user invalido"));
         }
 
         Optional<User> userOpt = userRepo.findById(uuid);
         if (userOpt.isEmpty()) {
             return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
-                .body(Map.of("message", "Usuário não encontrado"));
+                .body(Map.of("message", "User nao encontrado"));
         }
 
         User user = userOpt.get();
@@ -98,14 +98,14 @@ public class UserController {
         } catch (IllegalArgumentException ex) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("message", "ID de usuário inválido"));
+                    .body(Map.of("message", "ID de user invalido"));
         }
 
         Optional<User> userOpt = userRepo.findById(uuid);
         if (userOpt.isEmpty()) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("message", "Usuário não encontrado"));
+                    .body(Map.of("message", "User nao encontrado"));
         }
 
         // Validar se o novo email/username não colide com outro registro
@@ -118,7 +118,7 @@ public class UserController {
             if (userRepo.existsByEmail(novoEmail)) {
                 return ResponseEntity
                     .status(HttpStatus.CONFLICT)
-                    .body(Map.of("email", "Email já está em uso"));
+                    .body(Map.of("email", "Email ja esta em uso"));
             }
         }
 
@@ -127,7 +127,7 @@ public class UserController {
             if (userRepo.existsByUsername(novoUsername)) {
                 return ResponseEntity
                     .status(HttpStatus.CONFLICT)
-                    .body(Map.of("username", "Nome de usuário já está em uso"));
+                    .body(Map.of("username", "Nome de user ja esta em uso"));
             }
         }
 

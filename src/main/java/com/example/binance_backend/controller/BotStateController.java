@@ -35,7 +35,7 @@ public class BotStateController {
         } catch (IllegalArgumentException ex) {
             return ResponseEntity
                     .badRequest()
-                    .body(Map.of("message", "ID inválido"));
+                    .body(Map.of("message", "ID invalido"));
         }
 
         User user = userRepo.findById(uid)
@@ -43,7 +43,7 @@ public class BotStateController {
         if (user == null) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("message", "Usuário não encontrado"));
+                    .body(Map.of("message", "Usuario nao encontrado"));
         }
 
         Optional<BotState> maybeState = botStateRepo.findByUser(user);
@@ -70,7 +70,7 @@ public class BotStateController {
         } catch (IllegalArgumentException ex) {
             return ResponseEntity
                     .badRequest()
-                    .body(Map.of("message", "ID inválido"));
+                    .body(Map.of("message", "ID invalido"));
         }
 
         User user = userRepo.findById(uid)
@@ -78,14 +78,14 @@ public class BotStateController {
         if (user == null) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("message", "Usuário não encontrado"));
+                    .body(Map.of("message", "User nao encontrado"));
         }
 
         Optional<BotState> maybeState = botStateRepo.findByUser(user);
         if (maybeState.isEmpty()) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("message", "Estado do bot não encontrado"));
+                    .body(Map.of("message", "Estado do bot nao encontrado"));
         }
 
         BotState state = maybeState.get();
@@ -103,7 +103,7 @@ public class BotStateController {
         } catch (IllegalArgumentException ex) {
             return ResponseEntity
                     .badRequest()
-                    .body(Map.of("message", "ID inválido"));
+                    .body(Map.of("message", "ID invalido"));
         }
 
         User user = userRepo.findById(uid)
@@ -111,14 +111,14 @@ public class BotStateController {
         if (user == null) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("message", "Usuário não encontrado"));
+                    .body(Map.of("message", "User nao encontrado"));
         }
 
         Optional<BotState> maybeState = botStateRepo.findByUser(user);
         if (maybeState.isEmpty()) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("message", "Estado do bot não encontrado"));
+                    .body(Map.of("message", "Estado do bot nao encontrado"));
         }
 
         boolean isActive = maybeState.get().isActive();

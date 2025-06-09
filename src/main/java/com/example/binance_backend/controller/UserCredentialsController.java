@@ -49,18 +49,18 @@ public class UserCredentialsController {
         } catch (IllegalArgumentException ex) {
             return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(Map.of("message", "ID de usuário inválido"));
+                .body(Map.of("message", "ID de user invalido"));
         }
 
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Usuário não encontrado"
+                        HttpStatus.NOT_FOUND, "User nao encontrado"
                 ));
 
         if (credRepo.existsByUser(user)) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
-                    .body(Map.of("message", "Credenciais já cadastradas para este usuário"));
+                    .body(Map.of("message", "Credenciais ja existentes para este user"));
         }
 
         UserCredentials creds = new UserCredentials();
@@ -87,7 +87,7 @@ public class UserCredentialsController {
 
         User user = userRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Usuário não encontrado"
+                        HttpStatus.NOT_FOUND, "User nao encontrado"
                 ));
 
         boolean exists = credRepo.existsByUser(user);
@@ -103,19 +103,19 @@ public class UserCredentialsController {
         } catch (IllegalArgumentException ex) {
             return ResponseEntity
                     .badRequest()
-                    .body(Map.of("message", "ID inválido"));
+                    .body(Map.of("message", "ID invalido"));
         }
 
         User user = userRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Usuário não encontrado"
+                        HttpStatus.NOT_FOUND, "User nao encontrado"
                 ));
 
         Optional<UserCredentials> credOpt = credRepo.findByUser(user);
         if (credOpt.isEmpty()) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("message", "Credenciais não encontradas"));
+                    .body(Map.of("message", "Credenciais nao encontradas"));
         }
 
         if (simulationMode) {
