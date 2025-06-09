@@ -4,13 +4,16 @@ public class UserProfileResponse {
     private String userId;
     private String username;
     private String email;
+    private float balance;
+
 
     public UserProfileResponse() { }
 
-    public UserProfileResponse(String userId, String username, String email) {
+    public UserProfileResponse(String userId, String username, String email, float balance) {
         this.userId = userId;
         this.username = username;
         this.email = email;
+        this.balance = balance;
     }
 
     public String getUserId() {
@@ -32,5 +35,12 @@ public class UserProfileResponse {
     }
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public float getBalance() {
+        return balance;
+    }
+    public void setBalance(float balance) {
+        this.balance = balance;
     }
 }
