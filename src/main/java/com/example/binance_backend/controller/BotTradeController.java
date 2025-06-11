@@ -19,6 +19,7 @@ public class BotTradeController {
 
     @GetMapping("/user/{userId}")
     public List<BotTrade> listByUser(@PathVariable UUID userId) {
+        // Usa o método definido no repository
         return repo.findByUserIdOrderByCreatedAtDesc(userId);
     }
 

@@ -5,11 +5,13 @@ import com.example.binance_backend.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@Repository
 public interface BotTradeRepository extends JpaRepository<BotTrade, UUID> {
 
     @Query("SELECT t FROM BotTrade t " +
@@ -21,6 +23,9 @@ public interface BotTradeRepository extends JpaRepository<BotTrade, UUID> {
             @Param("symbol") String symbol
     );
 
-    List<BotTrade> findByUserOrderByCreatedAtDesc(User user); // usa o User direto
-    List<BotTrade> findByUserIdOrderByCreatedAtDesc(UUID userId); // usa o ID do User
+    // Busca todos os trades (abertos e fechados) de um usuário, ordenados por data decrescente
+    List<BotTrade> findByUserIdOrderByCreatedAtDesc(UUID userId);
+
+    // Caso prefira usar o objeto User diretamente
+    List<BotTrade> findByUserOrderByCreatedAtDesc(User user);
 }

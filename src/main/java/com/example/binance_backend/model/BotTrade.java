@@ -1,5 +1,7 @@
 package com.example.binance_backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -10,19 +12,22 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "bot_trades")
+// Ignora os proxy fields do Hibernate ao serializar para JSON
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class BotTrade {
 
     @Id
     @GeneratedValue
     private UUID id;
 
-    // <<< Relacionamento ManyToOne para User >>>
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
         name = "user_id",
         nullable = false,
         foreignKey = @ForeignKey(name = "fk_bot_trade_user")
     )
+    // Não serializa o User (evita proxy exception)
+    @JsonIgnore
     private User user;
 
     @Column(nullable = false)
@@ -56,6 +61,9 @@ public class BotTrade {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private OffsetDateTime updatedAt;
+
+    @Column(name = "close_reason")
+    private String closeReason;
 
     // ======= GETTERS & SETTERS =======
 
@@ -125,7 +133,7 @@ public class BotTrade {
     public OffsetDateTime getCreatedAt() {
         return createdAt;
     }
-    // Não há setter para createdAt, pois é automático com @CreationTimestamp
+    // Sem setter para createdAt (gerado automaticamente)
 
     public OffsetDateTime getExecutedAt() {
         return executedAt;
@@ -140,4 +148,12 @@ public class BotTrade {
     public void setUpdatedAt(OffsetDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
+
+    public String getCloseReason() {
+    return closeReason;
+}
+
+public void setCloseReason(String closeReason) {
+    this.closeReason = closeReason;
+}
 }
