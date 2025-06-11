@@ -159,110 +159,195 @@ public class BotService {
 
             boolean shouldBuy = !buyChecks.isEmpty() && buyChecks.stream().allMatch(Boolean::booleanValue);
             if (shouldBuy) {
-                logger.info("Compra aconselhada.");
-                if (simulationMode) {
-                    BotTrade simulated = new BotTrade();
-                    simulated.setUser(user);
-                    simulated.setSymbol(symbol);
-                    simulated.setSide("buy");
-                    simulated.setAmount(settings.getTradeAmount());
-                    simulated.setPrice(lastPrice);
-                    simulated.setStatus("OPEN");
-                    botTradeRepo.save(simulated);
-                    logger.info("Trade simulado aberto: ID={} | Entrada={} | Quantidade={}",
-                            simulated.getId(),
-                            lastPrice.setScale(4, RoundingMode.HALF_UP),
-                            settings.getTradeAmount());
-                    logger.info("Resultado: ordem NAO enviada (simulacao ativa)");
-                } else {
-                    placeOrderAccordingToType(user, settings, lastPrice,
-                            creds.getEncryptedApiKey(), creds.getEncryptedSecretKey());
+                            logger.info("Compra aconselhada.");
+                            if (simulationMode) {
+                                logger.info("Compra simulada aconselhada para {} | Preco: {}", symbol, lastPrice.setScale(4, RoundingMode.HALF_UP));
+                                openSimulatedTrade(user, symbol, settings.getTradeAmount(), lastPrice);
+                            } else {
+                                placeOrderAccordingToType(user, settings, lastPrice,
+                                        creds.getEncryptedApiKey(), creds.getEncryptedSecretKey());
+                            }
+                        } else {
+                            logger.info("Compra desaconselhada.");
+                        }
+
+                    }
                 }
-            } else {
-                logger.info("Compra desaconselhada.");
-            }
-        }
-    }
+
+    private void openSimulatedTrade(
+    User user,
+    String symbol,
+    BigDecimal amount,
+    BigDecimal entryPrice
+) {
+    logger.info("[SIMULACAO] A abrir nova trade de COMPRA simulada:");
+    logger.info("- Utilizador ID: {}", user.getId());
+    logger.info("- Simbolo: {}", symbol);
+    logger.info("- Quantidade: {}", amount.setScale(6, RoundingMode.HALF_UP));
+    logger.info("- Preco de entrada: {}", entryPrice.setScale(4, RoundingMode.HALF_UP));
+
+    // Cria trade simulada
+    BotTrade simulated = new BotTrade();
+    simulated.setUser(user);
+    simulated.setSymbol(symbol);
+    simulated.setSide("buy");
+    simulated.setAmount(amount);
+    simulated.setPrice(entryPrice);
+    simulated.setStatus("OPEN");
+    simulated.setExecutedAt(OffsetDateTime.now());
+
+    botTradeRepo.save(simulated);
+
+    // Subtrai o valor da compra ao saldo do utilizador
+    BigDecimal cost = entryPrice.multiply(amount);
+    BigDecimal newBalance = BigDecimal.valueOf(user.getBalance()).subtract(cost);
+    user.setBalance(newBalance.floatValue());
+    userRepo.save(user);
+
+    logger.info("[SIMULACAO] Trade de compra simulada criada com sucesso:");
+    logger.info("- ID: {}", simulated.getId());
+    logger.info("- Custo total: {}", cost.setScale(2, RoundingMode.HALF_UP));
+    logger.info("- Novo saldo do utilizador: {}", newBalance.setScale(2, RoundingMode.HALF_UP));
+}
 
     private void processOpenTrade(
-            BotTrade openTrade,
-            BotSettings settings,
-            BigDecimal lastPrice,
-            BigDecimal rsi,
-            MACDResult macdResult,
-            BollingerResult bb,
-            String encApiKey,
-            String encSecretKey
-    ) {
+    BotTrade openTrade,
+    BotSettings settings,
+    BigDecimal lastPrice,
+    BigDecimal currentRSI,
+    MACDResult macd,
+    BollingerResult bollinger,
+    String encApiKey,
+    String encSecretKey
+) {
+        
         String symbol = openTrade.getSymbol();
-        BigDecimal entry = openTrade.getPrice();
-        BigDecimal amount = openTrade.getAmount();
-        User user = openTrade.getUser();
 
-        BigDecimal slPercent = settings.getStopLossPerc().divide(BigDecimal.valueOf(100), 8, RoundingMode.HALF_UP);
-        BigDecimal tpPercent = settings.getTakeProfitPerc().divide(BigDecimal.valueOf(100), 8, RoundingMode.HALF_UP);
-        BigDecimal stopLossPrice = entry.multiply(BigDecimal.ONE.subtract(slPercent));
-        BigDecimal takeProfitPrice = entry.multiply(BigDecimal.ONE.add(tpPercent));
+    logger.info("Trade em aberto detectado.");
 
-        if (lastPrice.compareTo(stopLossPrice) <= 0) {
-            logger.info("Stop-loss atingido para {}. Ultimo preco: {} <= SL: {}", symbol, lastPrice.setScale(4, RoundingMode.HALF_UP), stopLossPrice.setScale(4, RoundingMode.HALF_UP));
-            if (!simulationMode) closeTrade(openTrade, lastPrice, "STOP_LOSS", encApiKey, encSecretKey);
-            else logger.info("Simulacao ativa: venda por stop-loss NAO executada.");
-            return;
-        } else if (lastPrice.compareTo(takeProfitPrice) >= 0) {
-            logger.info("Take-profit atingido para {}. Ultimo preco: {} >= TP: {}", symbol, lastPrice.setScale(4, RoundingMode.HALF_UP), takeProfitPrice.setScale(4, RoundingMode.HALF_UP));
-            if (!simulationMode) closeTrade(openTrade, lastPrice, "TAKE_PROFIT", encApiKey, encSecretKey);
-            else logger.info("Simulacao ativa: venda por take-profit NAO executada.");
-            return;
-        }
+    // Calcula preços de SL/TP
+    BigDecimal entryPrice = openTrade.getPrice();
+    BigDecimal takeProfitPrice = entryPrice.add(entryPrice.multiply(settings.getTakeProfitPerc().divide(BigDecimal.valueOf(100))));
+    BigDecimal stopLossPrice = entryPrice.subtract(entryPrice.multiply(settings.getStopLossPerc().divide(BigDecimal.valueOf(100))));
 
-        logger.info("Sinais de venda:");
-        List<Boolean> sellChecks = new ArrayList<>();
+    logger.info("Take-profit atingido para {}. Ultimo preco: {} >= TP: {}", symbol, lastPrice.setScale(4, RoundingMode.HALF_UP), takeProfitPrice.setScale(4, RoundingMode.HALF_UP));
+    logger.info("Stop-loss atingido para {}. Ultimo preco: {} <= SL: {}", symbol, lastPrice.setScale(4, RoundingMode.HALF_UP), stopLossPrice.setScale(4, RoundingMode.HALF_UP));
 
-        if (settings.isRsiEnabled()) {
-            boolean signal = rsi.compareTo(BigDecimal.valueOf(70)) > 0;
-            logger.info("- [RSI ativo] RSI ({}) > 70? {}", rsi.setScale(2, RoundingMode.HALF_UP), signal);
-            sellChecks.add(signal);
+    // 1. Take Profit
+    if (lastPrice.compareTo(takeProfitPrice) >= 0) {
+        if (simulationMode) {
+            logger.info("Simulacao ativa: venda por take-profit executada.");
+            closeSimulatedTrade(openTrade, lastPrice, "TAKE_PROFIT");
         } else {
-            logger.info("- [RSI inativo] sem RSI");
+            logger.info("Venda real por take-profit executada.");
+            closeTrade(openTrade, lastPrice, "TAKE_PROFIT", encApiKey, encSecretKey);
         }
-
-        if (settings.isMacdEnabled()) {
-            boolean signal = macdResult.histogram.compareTo(BigDecimal.ZERO) < 0;
-            logger.info("- [MACD ativo] MACD.hist < 0? {}", signal);
-            sellChecks.add(signal);
-        } else {
-            logger.info("- [MACD inativo] sem MACD");
-        }
-
-        if (settings.isMovingAvgEnabled()) {
-            boolean signal = lastPrice.compareTo(bb.upperBand) > 0;
-            logger.info("- [Bollinger ativo] preco > BB.upper? {}", signal);
-            sellChecks.add(signal);
-        } else {
-            logger.info("- [Bollinger inativo] sem Bollinger");
-        }
-
-        boolean shouldSell = !sellChecks.isEmpty() && sellChecks.stream().allMatch(Boolean::booleanValue);
-        if (shouldSell) {
-            logger.info("Venda aconselhada.");
-            if (simulationMode) {
-                BotTrade simulated = new BotTrade();
-                simulated.setUser(user);
-                simulated.setSymbol(symbol);
-                simulated.setSide("sell");
-                simulated.setAmount(amount);
-                simulated.setPrice(lastPrice);
-                simulated.setStatus("CLOSED");
-                botTradeRepo.save(simulated);
-                logger.info("Trade simulado fechado: ID={} | Saida={} | Quantidade={}", simulated.getId(), lastPrice.setScale(4,RoundingMode.HALF_UP), amount);
-            } else {
-                closeTrade(openTrade, lastPrice, "INDICATOR_SELL", encApiKey, encSecretKey);
-            }
-        } else {
-            logger.info("Venda desaconselhada.");
-        }
+        return;
     }
+
+    // 2. Stop Loss
+    if (lastPrice.compareTo(stopLossPrice) <= 0) {
+        if (simulationMode) {
+            logger.info("Simulacao ativa: venda por stop-loss executada.");
+            closeSimulatedTrade(openTrade, lastPrice, "STOP_LOSS");
+        } else {
+            logger.info("Venda real por stop-loss executada.");
+            closeTrade(openTrade, lastPrice, "STOP_LOSS", encApiKey, encSecretKey);
+        }
+        return;
+    }
+
+    // 3. Indicadores
+    boolean shouldSell = false;
+    logger.info("Sinais de venda:");
+
+    if (settings.isRsiEnabled()) {
+        logger.info("- [RSI ativo] RSI ({}) > 70? {}", currentRSI, currentRSI.compareTo(BigDecimal.valueOf(70)) > 0);
+    if (currentRSI.compareTo(BigDecimal.valueOf(70)) > 0) shouldSell = true;
+    }
+
+    if (settings.isMacdEnabled()) {
+    logger.info("- [MACD ativo] MACD.hist < 0? {}", macd.histogram.compareTo(BigDecimal.ZERO) < 0);
+    if (macd.histogram.compareTo(BigDecimal.ZERO) < 0) shouldSell = true;
+}
+
+    if (settings.isMovingAvgEnabled()) {
+        logger.info("- [Bollinger inativo] sem Bollinger");
+        // Se tiveres lógica de média móvel ou Bollinger, podes incluir
+    }
+
+    if (shouldSell) {
+        if (simulationMode) {
+            logger.info("Simulacao ativa: venda por indicador executada.");
+            closeSimulatedTrade(openTrade, lastPrice, "INDICATOR_SELL");
+        } else {
+            logger.info("Venda real por indicador executada.");
+            closeTrade(openTrade, lastPrice, "INDICATOR_SELL", encApiKey, encSecretKey);
+        }
+    } else {
+        logger.info("Venda desaconselhada.");
+    }
+}
+
+    private void closeSimulatedTrade(
+        BotTrade openTrade,
+        BigDecimal exitPrice,
+        String reason
+) {
+    String symbol = openTrade.getSymbol();
+    BigDecimal amount = openTrade.getAmount();
+    User user = openTrade.getUser();
+
+    BigDecimal entryPrice = openTrade.getPrice();
+    BigDecimal profit = exitPrice.subtract(entryPrice).multiply(amount);
+    OffsetDateTime now = OffsetDateTime.now();
+
+    logger.info("[SIMULACAO] A fechar trade de COMPRA simulada:");
+    logger.info("- ID: {}", openTrade.getId());
+    logger.info("- Simbolo: {}", symbol);
+    logger.info("- Preco de entrada: {}", entryPrice.setScale(4, RoundingMode.HALF_UP));
+    logger.info("- Preco de saida: {}", exitPrice.setScale(4, RoundingMode.HALF_UP));
+    logger.info("- Motivo do fecho: {}", reason);
+
+    // Atualiza a trade de compra
+    openTrade.setExecutedAt(now);
+    openTrade.setStatus("CLOSED");
+    openTrade.setCloseReason(reason);
+    openTrade.setProfitEstimate(profit.setScale(8, RoundingMode.HALF_UP));
+    // Mantém o preço de entrada como está (não o alteres para o preço de saída!)
+    botTradeRepo.save(openTrade);
+
+    logger.info("[SIMULACAO] Trade de compra simulada atualizada como FECHADA.");
+
+    // Cria trade de venda simulada (apenas registo para histórico)
+    BotTrade sellRecord = new BotTrade();
+    sellRecord.setUser(user);
+    sellRecord.setSymbol(symbol);
+    sellRecord.setSide("sell");
+    sellRecord.setAmount(amount);
+    sellRecord.setPrice(exitPrice); // preço de venda
+    sellRecord.setStatus("CLOSED");
+    sellRecord.setExecutedAt(now);
+    sellRecord.setProfitEstimate(profit.setScale(8, RoundingMode.HALF_UP));
+    botTradeRepo.save(sellRecord);
+
+    logger.info("[SIMULACAO] Trade de VENDA simulada criada:");
+    logger.info("- ID: {}", sellRecord.getId());
+    logger.info("- Simbolo: {}", symbol);
+    logger.info("- Quantidade: {}", amount.setScale(6, RoundingMode.HALF_UP));
+    logger.info("- Preco de venda: {}", exitPrice.setScale(4, RoundingMode.HALF_UP));
+    logger.info("- Lucro estimado: {}", profit.setScale(8, RoundingMode.HALF_UP));
+
+    // Atualiza saldo do utilizador com o valor da venda
+    BigDecimal saleValue = exitPrice.multiply(amount);
+    BigDecimal newBalance = BigDecimal.valueOf(user.getBalance()).add(saleValue);
+    user.setBalance(newBalance.floatValue());
+    userRepo.save(user);
+
+    logger.info("[SIMULACAO] Saldo atualizado para utilizador ID {}: {}", user.getId(), newBalance.setScale(2, RoundingMode.HALF_UP));
+}
+
+
 
     private void closeTrade(
         BotTrade openTrade,
@@ -291,7 +376,6 @@ public class BotService {
 
     // Atualiza trade original (aberto anteriormente)
     openTrade.setExecutedAt(now);
-    openTrade.setPrice(exitPrice); // atualiza o preço de fecho
     openTrade.setStatus("CLOSED");
     openTrade.setCloseReason(reason);
     openTrade.setProfitEstimate(profit.setScale(8, RoundingMode.HALF_UP));
