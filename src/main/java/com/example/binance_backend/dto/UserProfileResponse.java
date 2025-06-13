@@ -1,15 +1,16 @@
 package com.example.binance_backend.dto;
+import java.math.BigDecimal;
 
 public class UserProfileResponse {
     private String userId;
     private String username;
     private String email;
-    private float balance;
+    private BigDecimal balance;
 
 
     public UserProfileResponse() { }
 
-    public UserProfileResponse(String userId, String username, String email, float balance) {
+    public UserProfileResponse(String userId, String username, String email, BigDecimal balance) {
         this.userId = userId;
         this.username = username;
         this.email = email;
@@ -37,10 +38,10 @@ public class UserProfileResponse {
         this.email = email;
     }
 
-    public float getBalance() {
+    public BigDecimal getBalance() {
         return balance;
     }
-    public void setBalance(float balance) {
+    public void setBalance(BigDecimal balance) {
         this.balance = balance;
     }
 }

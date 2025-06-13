@@ -24,8 +24,11 @@ public class User {
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
-    @Column(name = "balance", nullable = false)
-    private float balance = 0.0f;
+    // ---------------- ALTERAÇÃO AQUI ----------------
+    // Antes: private float balance = 0.0f;
+    @Column(name = "balance", nullable = false, precision = 18, scale = 8)
+    private BigDecimal balance = BigDecimal.ZERO;
+    // ------------------------------------------------
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -48,10 +51,15 @@ public class User {
     public String getPasswordHash() { return passwordHash; }
     public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
 
-    public float getBalance() { return balance; }
-    public void setBalance(float balance) { this.balance = balance; }
+    // ---------------- ALTERAÇÃO AQUI ----------------
+    public BigDecimal getBalance() {
+        return balance;
+    }
+    public void setBalance(BigDecimal balance) {
+        this.balance = balance;
+    }
+    // ------------------------------------------------
 
     public OffsetDateTime getCreatedAt() { return createdAt; }
     public OffsetDateTime getUpdatedAt() { return updatedAt; }
-
 }
