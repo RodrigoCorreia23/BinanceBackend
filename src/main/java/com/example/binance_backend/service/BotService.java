@@ -94,30 +94,22 @@ public class BotService {
 
         logger.info("[Modo: {}] user: {} | Par: {}", simulationMode ? "SIMULACAO" : "PRODUCAO", user.getId(), symbol);
 
-        if (simulationMode) {
-            logger.info("A obter candles (simulado, sem chamada a API)...");
-            closes = simulateCloses(user.getId(), limit);
-            lastPrice = closes.get(closes.size() - 1);
-        } else {
-            List<BinanceClient.Candle> candles = binanceClient.getKlines(symbol, interval, limit);
-            if (candles.size() < 20) {
-                logger.warn("Dados insuficientes ({} candles) para {}, user {}.", candles.size(), symbol, user.getId());
-                return;
-            }
-            closes = new ArrayList<>();
-            for (BinanceClient.Candle c : candles) {
-                closes.add(c.close);
-            }
-            lastPrice = closes.get(closes.size() - 1);
+        List<BinanceClient.Candle> candles = binanceClient.getKlines(symbol, interval, limit);
+        if (candles.size() < 20) {
+            logger.warn("Dados insuficientes ({} candles) para {}, user {}.", candles.size(), symbol, user.getId());
+            return;
         }
+        closes = new ArrayList<>();
+        for (BinanceClient.Candle c : candles) {
+            closes.add(c.close);
+        }
+        lastPrice = closes.get(closes.size() - 1);
 
-        // Calcular indicadores
         int rsiPeriod = settings.getRsiThreshold() != null ? settings.getRsiThreshold() : 14;
         BigDecimal rsi = calculateRSI(closes, rsiPeriod);
         MACDResult macdResult = calculateMACD(closes, 12, 26, 9);
         BollingerResult bb = calculateBollingerBands(closes, 20, 2.0);
 
-        // Credenciais
         Optional<UserCredentials> credOpt = userCredentialsRepo.findByUser(user);
         if (credOpt.isEmpty()) {
             logger.warn("user {} nao tem credenciais Binance associadas.", user.getId());
@@ -125,9 +117,8 @@ public class BotService {
         }
         UserCredentials creds = credOpt.get();
 
-        // Quantidade a comprar = spendAmount / lastPrice
-        BigDecimal spendAmount = settings.getTradeAmount();   // USDT que o usuário quer gastar
-        int assetScale    = 8;                                // casas decimais do ativo
+        BigDecimal spendAmount = settings.getTradeAmount();
+        int assetScale = 8;
         BigDecimal quantity = spendAmount.divide(lastPrice, assetScale, RoundingMode.DOWN);
         logger.info("Usuário quer gastar {} USDT → quantidade = {}", spendAmount, quantity);
 

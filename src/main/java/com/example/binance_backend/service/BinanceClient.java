@@ -122,9 +122,9 @@ public class BinanceClient {
         return "0";
     }
 
-    // ==================================================
-    // 3) ENVIO DE ORDENS PRIVADAS (BUY/SELL) DINÂMICAS
-    // ==================================================
+    // =====================================
+    // 3) ENVIO DE ORDENS PRIVADAS (BUY/SELL) 
+    // =====================================
     /**
      * Envia uma ordem (BUY ou SELL) para a Binance, usando as credenciais do user.
      * Aceita ordens do tipo:
@@ -226,8 +226,7 @@ public class BinanceClient {
     }
 
     /**
-     * Descriptografa uma string cifrada. Substitua este stub pelo seu utilitário real.
-     * Se as chaves no banco estiverem em texto puro, apenas retorne encrypted.
+     * Descriptografa uma string cifrada. 
      */
     private String decrypt(String encrypted) {
         // TODO: implemente sua lógica de descriptografia (AES, RSA, KMS, etc.)
