@@ -28,6 +28,7 @@ public class BotService {
     private final UserCredentialsRepository userCredentialsRepo;
     private final BinanceClient binanceClient;
 
+
     @Value("${bot.simulation:true}")
     private boolean simulationMode;
 
@@ -39,6 +40,7 @@ public class BotService {
             UserRepository userRepo,
             UserCredentialsRepository userCredentialsRepo,
             BinanceClient binanceClient
+
     ) {
         this.botSettingsRepo = botSettingsRepo;
         this.botStateRepo = botStateRepo;
@@ -94,22 +96,18 @@ public class BotService {
 
         logger.info("[Modo: {}] user: {} | Par: {}", simulationMode ? "SIMULACAO" : "PRODUCAO", user.getId(), symbol);
 
-        if (simulationMode) {
-            logger.info("A obter candles (simulado, sem chamada a API)...");
-            closes = simulateCloses(user.getId(), limit);
-            lastPrice = closes.get(closes.size() - 1);
-        } else {
-            List<BinanceClient.Candle> candles = binanceClient.getKlines(symbol, interval, limit);
-            if (candles.size() < 20) {
-                logger.warn("Dados insuficientes ({} candles) para {}, user {}.", candles.size(), symbol, user.getId());
-                return;
-            }
-            closes = new ArrayList<>();
-            for (BinanceClient.Candle c : candles) {
-                closes.add(c.close);
-            }
-            lastPrice = closes.get(closes.size() - 1);
+        // Sempre obter candles da API Binance pública
+        logger.info("A obter candles da API Binance...");
+        List<BinanceClient.Candle> candles = binanceClient.getKlines(symbol, interval, limit);
+        if (candles.size() < 20) {
+            logger.warn("Dados insuficientes ({} candles) para {}, user {}.", candles.size(), symbol, user.getId());
+            return;
         }
+        closes = new ArrayList<>();
+        for (BinanceClient.Candle c : candles) {
+            closes.add(c.close);
+        }
+        lastPrice = closes.get(closes.size() - 1);
 
         // Calcular indicadores
         int rsiPeriod = settings.getRsiThreshold() != null ? settings.getRsiThreshold() : 14;
@@ -126,8 +124,8 @@ public class BotService {
         UserCredentials creds = credOpt.get();
 
         // Quantidade a comprar = spendAmount / lastPrice
-        BigDecimal spendAmount = settings.getTradeAmount();   // USDT que o usuário quer gastar
-        int assetScale    = 8;                                // casas decimais do ativo
+        BigDecimal spendAmount = settings.getTradeAmount();
+        int assetScale    = 8;
         BigDecimal quantity = spendAmount.divide(lastPrice, assetScale, RoundingMode.DOWN);
         logger.info("Usuário quer gastar {} USDT → quantidade = {}", spendAmount, quantity);
 
@@ -206,6 +204,7 @@ public class BotService {
 
         logger.info("[SIMULACAO] Custo total: {}", cost.setScale(2, RoundingMode.HALF_UP));
         logger.info("[SIMULACAO] Novo saldo do utilizador: {}", newBalance.setScale(2, RoundingMode.HALF_UP));
+
     }
 
     private void processOpenTrade(
@@ -279,6 +278,7 @@ public class BotService {
         BigDecimal newBalance = user.getBalance().add(saleValue);
         user.setBalance(newBalance);
         userRepo.save(user);
+
     }
 
     private void closeTrade(
@@ -328,6 +328,7 @@ public class BotService {
         BigDecimal newBalance = user.getBalance().add(saleValue);
         user.setBalance(newBalance);
         userRepo.save(user);
+
     }
 
     private void placeOrderAccordingToType(
@@ -339,7 +340,6 @@ public class BotService {
             BigDecimal quantity
     ) {
         String symbol = settings.getTradingPair();
-
         String orderType = settings.getOrderType();
         BigDecimal limitPrice = settings.getLimitPrice();
         BigDecimal stopPrice = settings.getStopPrice();
@@ -381,7 +381,8 @@ public class BotService {
                 binanceType,
                 quantity.setScale(8, RoundingMode.DOWN),
                 priceParam != null ? priceParam.setScale(4,RoundingMode.HALF_UP) : "-",
-                stopPriceParam != null ? stopPriceParam.setScale(4,RoundingMode.HALF_UP) : "-");
+                stopPriceParam != null ? stopPriceParam.setScale(4,RoundingMode.HALF_UP) : "-"
+        );
 
         try {
             BinanceClient.BinanceOrderResponse response = binanceClient.placeOrder(
@@ -410,23 +411,14 @@ public class BotService {
                     execPrice.setScale(4,RoundingMode.HALF_UP),
                     quantity.setScale(6,RoundingMode.HALF_UP)
             );
+
         } catch (Exception e) {
             logger.error("Erro ao executar ordem BUY: {}", e.getMessage());
         }
     }
 
-        private List<BigDecimal> simulateCloses(UUID userId, int limit) {
-        List<BigDecimal> closes = new ArrayList<>();
-        BigDecimal price0 = BigDecimal.valueOf(100.00);
-        Random rnd = new Random(userId.hashCode() + System.currentTimeMillis());
-        for (int i = 0; i < limit; i++) {
-            BigDecimal delta = BigDecimal.valueOf(rnd.nextDouble() * 0.02 - 0.01);
-            price0 = price0.multiply(BigDecimal.ONE.add(delta));
-            closes.add(price0);
-        }
-        return closes;
-    }
-
+    // Métodos de cálculo de indicadores permanecem idênticos à implementação original
+    // RSI
     private BigDecimal calculateRSI(List<BigDecimal> closes, int period) {
         int n = closes.size();
         if (n <= period) {
@@ -448,26 +440,11 @@ public class BotService {
             return BigDecimal.valueOf(100);
         }
         BigDecimal rs = avgGain.divide(avgLoss, 8, RoundingMode.HALF_UP);
-        return BigDecimal.valueOf(100).subtract(
-                BigDecimal.valueOf(100).divide(BigDecimal.ONE.add(rs), 8, RoundingMode.HALF_UP)
-        );
+        return BigDecimal.valueOf(100)
+                .subtract(BigDecimal.valueOf(100).divide(BigDecimal.ONE.add(rs), 8, RoundingMode.HALF_UP));
     }
 
-    private MACDResult calculateMACD(List<BigDecimal> closes, int fastPeriod, int slowPeriod, int signalPeriod) {
-        BigDecimal emaFast = calculateEMA(closes, fastPeriod);
-        BigDecimal emaSlow = calculateEMA(closes, slowPeriod);
-        BigDecimal macdLine = emaFast.subtract(emaSlow);
-        List<BigDecimal> diffList = new ArrayList<>();
-        for (int i = 0; i < closes.size(); i++) {
-            List<BigDecimal> sub = closes.subList(0, i + 1);
-            diffList.add(calculateEMA(sub, fastPeriod).subtract(calculateEMA(sub, slowPeriod)));
-        }
-        int sz = diffList.size();
-        BigDecimal signalLine = calculateEMA(diffList.subList(sz - signalPeriod, sz), signalPeriod);
-        BigDecimal histogram = macdLine.subtract(signalLine);
-        return new MACDResult(macdLine, signalLine, histogram);
-    }
-
+    // EMA (usado no MACD)
     private BigDecimal calculateEMA(List<BigDecimal> closes, int period) {
         int n = closes.size();
         if (n < period) {
@@ -486,6 +463,21 @@ public class BotService {
         return ema;
     }
 
+    // MACD
+    private MACDResult calculateMACD(List<BigDecimal> closes, int fastPeriod, int slowPeriod, int signalPeriod) {
+        BigDecimal macdLine = calculateEMA(closes, fastPeriod).subtract(calculateEMA(closes, slowPeriod));
+        List<BigDecimal> diffList = new ArrayList<>();
+        for (int i = 0; i < closes.size(); i++) {
+            List<BigDecimal> sub = closes.subList(0, i + 1);
+            diffList.add(calculateEMA(sub, fastPeriod).subtract(calculateEMA(sub, slowPeriod)));
+        }
+        int sz = diffList.size();
+        BigDecimal signalLine = calculateEMA(diffList.subList(sz - signalPeriod, sz), signalPeriod);
+        BigDecimal histogram = macdLine.subtract(signalLine);
+        return new MACDResult(macdLine, signalLine, histogram);
+    }
+
+    // Bollinger Bands
     private BollingerResult calculateBollingerBands(List<BigDecimal> closes, int period, double multiplier) {
         int n = closes.size();
         if (n < period) {
@@ -508,6 +500,7 @@ public class BotService {
         return new BollingerResult(sma, upper, lower);
     }
 
+    // Método auxiliar de raiz quadrada
     private BigDecimal sqrt(BigDecimal value, int scale) {
         BigDecimal x0 = BigDecimal.ZERO;
         BigDecimal x1 = new BigDecimal(Math.sqrt(value.doubleValue()));
@@ -519,6 +512,7 @@ public class BotService {
         }
         return x1;
     }
+
 
     private static class MACDResult {
         public final BigDecimal macdLine;
@@ -542,4 +536,3 @@ public class BotService {
         }
     }
 }
-
