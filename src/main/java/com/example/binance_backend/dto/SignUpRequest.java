@@ -7,6 +7,9 @@ public class SignUpRequest {
 
     public SignUpRequest() {}
 
+    public SignUpRequest(String mail, String utilizador, String number) {
+    }
+
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
 

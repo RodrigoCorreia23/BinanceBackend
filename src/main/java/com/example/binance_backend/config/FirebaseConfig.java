@@ -13,6 +13,7 @@ import java.io.InputStream;
 @Configuration
 public class FirebaseConfig {
 
+    // Configuração do Firebase
     private static final Logger logger = LoggerFactory.getLogger(FirebaseConfig.class);
 
     @PostConstruct

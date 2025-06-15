@@ -19,6 +19,7 @@ public class NotificationService {
     @Autowired
     private UserRepository userRepository;
 
+    // Envia uma notificação push para o utilizador
     public void sendPushNotification(User user, String title, String body) {
         if (user.getFcmToken() == null || user.getFcmToken().isEmpty()) {
             logger.warn("User {} não tem token FCM válido", user.getId());
