@@ -1,4 +1,3 @@
-// src/main/java/com/example/binance_backend/dto/LoginResponse.java
 package com.example.binance_backend.dto;
 
 public class LoginResponse {

@@ -12,7 +12,6 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "bot_trades")
-// Ignora os proxy fields do Hibernate ao serializar para JSON
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class BotTrade {
 
@@ -26,7 +25,6 @@ public class BotTrade {
         nullable = false,
         foreignKey = @ForeignKey(name = "fk_bot_trade_user")
     )
-    // Não serializa o User (evita proxy exception)
     @JsonIgnore
     private User user;
 

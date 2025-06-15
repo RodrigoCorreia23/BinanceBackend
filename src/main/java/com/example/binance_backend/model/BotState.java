@@ -14,7 +14,6 @@ public class BotState {
     @GeneratedValue
     private UUID id;
 
-    // <<< Relacionamento ManyToOne para User >>>
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
         name = "user_id",

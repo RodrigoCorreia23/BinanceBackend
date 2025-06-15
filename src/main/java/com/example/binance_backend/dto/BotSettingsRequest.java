@@ -4,9 +4,6 @@ import java.math.BigDecimal;
 import java.util.UUID;
 import jakarta.validation.constraints.NotNull;
 
-/**
- * DTO para receber JSON de BotSettings no controller.
- */
 public class BotSettingsRequest {
 
     @NotNull

@@ -10,22 +10,13 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.*;
 
-/**
- * BinanceClient: encapsula chamadas à API pública e privada da Binance,
- * recebendo as chaves do user dinamicamente (criptografadas no banco de dados).
- *
- * - getKlines(...)       → busca candles (klines) públicos.
- * - fetchFreeBalance(...)→ recupera saldo "free" de um asset (ex: USDT) usando credenciais do user.
- * - placeOrder(...)      → envia ordens privadas (MARKET, LIMIT, STOP_LOSS_LIMIT, TRAILING_STOP_MARKET, LIMIT_MAKER)
- *                         usando HMAC-SHA256 para assinatura.
- */
 @Service
 public class BinanceClient {
 
-    // WebClient para chamadas públicas (exchangeInfo, klines, etc.)
+    // WebClient para chamadas públicas
     private final WebClient publicClient;
 
-    // Base URL da API da Binance (tanto para público quanto para privado)
+    // Base URL da API da Binance
     private static final String BASE_URL = "https://api.binance.com";
 
     public BinanceClient() {
@@ -34,18 +25,7 @@ public class BinanceClient {
                 .build();
     }
 
-    // =====================================
-    // 1) BUSCA DE CANDLES (KLINES) PÚBLICOS
-    // =====================================
-    /**
-     * Retorna uma lista de Candle (openTime, open, high, low, close) para um dado symbol,
-     * no intervalo especificado (ex: "5m", "15m", "1h") e limite de candles.
-     *
-     * @param symbol   par de trading (ex: "BTCUSDT")
-     * @param interval intervalo (ex: "5m")
-     * @param limit    número de candles a retornar (ex: 50)
-     * @return lista de Candle contendo timestamps e preços
-     */
+   
     public List<Candle> getKlines(String symbol, String interval, int limit) {
         String path = "/api/v3/klines"
                 + "?symbol=" + symbol
@@ -72,18 +52,7 @@ public class BinanceClient {
         return candles;
     }
 
-    // ============================================================
-    // 2) BUSCA DE SALDO "FREE" DE UM ASSET (USDT, BTC, ETC.) PRIVADO
-    // ============================================================
-    /**
-     * Recupera o saldo "free" (não usado em ordens) de um determinado asset
-     * (por exemplo, "USDT") para o user cujas credenciais foram armazenadas.
-     *
-     * @param encryptedApiKey    chave da API cifrada no banco
-     * @param encryptedSecretKey secret da API cifrada no banco
-     * @param asset              código do asset (ex: "USDT", "BTC")
-     * @return string com o saldo livre (ex: "123.45678900")
-     */
+    
     public String fetchFreeBalance(String encryptedApiKey, String encryptedSecretKey, String asset) {
         // 1) Descriptografa as credenciais
         String apiKey    = decrypt(encryptedApiKey);
@@ -122,31 +91,6 @@ public class BinanceClient {
         return "0";
     }
 
-    // =====================================
-    // 3) ENVIO DE ORDENS PRIVADAS (BUY/SELL) 
-    // =====================================
-    /**
-     * Envia uma ordem (BUY ou SELL) para a Binance, usando as credenciais do user.
-     * Aceita ordens do tipo:
-     * - MARKET
-     * - LIMIT
-     * - STOP_LOSS_LIMIT
-     * - TRAILING_STOP_MARKET
-     * - LIMIT_MAKER
-     *
-     * Exemplo de uso:
-     *   placeOrder(encApiKey, encSecretKey, "BTCUSDT", "BUY", "MARKET", 0.001, null, null);
-     *
-     * @param encryptedApiKey    chave de API cifrada no banco
-     * @param encryptedSecretKey secret de API cifrada no banco
-     * @param symbol             par de trading (ex: "BTCUSDT")
-     * @param side               "BUY" ou "SELL"
-     * @param type               "MARKET", "LIMIT", "STOP_LOSS_LIMIT", "TRAILING_STOP_MARKET", "LIMIT_MAKER"
-     * @param quantity           quantidade a comprar/vender (ex: 0.001)
-     * @param price              preço de limite (se aplicável; null para ordens MARKET)
-     * @param stopPrice          preço de gatilho (para STOP_LOSS_LIMIT ou delta para TRAILING_STOP_MARKET)
-     * @return BinanceOrderResponse com dados do orderId, price, status, etc.
-     */
     public BinanceOrderResponse placeOrder(
             String encryptedApiKey,
             String encryptedSecretKey,
@@ -195,10 +139,6 @@ public class BinanceClient {
 
         return resp;
     }
-
-    // =========================
-    // MÉTODOS AUXILIARES PRIVADOS
-    // =========================
     private String buildQueryString(Map<String, String> params) {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, String> e : params.entrySet()) {
@@ -229,16 +169,10 @@ public class BinanceClient {
      * Descriptografa uma string cifrada. 
      */
     private String decrypt(String encrypted) {
-        // TODO: implemente sua lógica de descriptografia (AES, RSA, KMS, etc.)
+        // TODO: implementar a lógica de descriptografia (AES, RSA, KMS, etc.)
         return encrypted;
     }
 
-    // -------------------------------
-    // CLASSES INTERNAS DE RESPOSTA
-    // -------------------------------
-    /**
-     * Representa um candle (kline) retornado pela API pública.
-     */
     public static class Candle {
         public long openTime;
         public BigDecimal open, high, low, close;
@@ -251,10 +185,6 @@ public class BinanceClient {
         }
     }
 
-    /**
-     * Mapeia a resposta da Binance ao criar uma ordem.
-     * Contém apenas campos principais; amplie conforme necessidade.
-     */
     public static class BinanceOrderResponse {
         public String symbol;
         public String orderId;

@@ -13,7 +13,6 @@ public class BotStateHistory {
     @GeneratedValue
     private UUID id;
 
-    // <<< Relacionamento ManyToOne para BotState >>>
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
         name = "bot_state_id",

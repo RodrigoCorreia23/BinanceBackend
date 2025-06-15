@@ -130,7 +130,7 @@ public class BotService {
         BigDecimal spendAmount = settings.getTradeAmount();
         int assetScale    = 8;
         BigDecimal quantity = spendAmount.divide(lastPrice, assetScale, RoundingMode.DOWN);
-        logger.info("Usuário quer gastar {} USDT → quantidade = {}", spendAmount, quantity);
+        logger.info("User quer gastar {} USDT → quantidade = {}", spendAmount, quantity);
 
         Optional<BotTrade> maybeOpenTrade = botTradeRepo.findOpenTradeByUserAndSymbol(user.getId(), symbol);
         if (maybeOpenTrade.isPresent()) {

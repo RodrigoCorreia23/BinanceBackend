@@ -15,7 +15,6 @@ public class BotSettings {
     @GeneratedValue
     private UUID id;
 
-    // <<< Relacionamento ManyToOne para User >>>
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
         name = "user_id",
@@ -36,16 +35,11 @@ public class BotSettings {
     @Column(name = "limit_price", precision = 16, scale = 8)
     private BigDecimal limitPrice;
 
-    // ================================
-    // >>> NOVOS CAMPOS para ORDERS <<<
-    // ================================
     @Column(name = "stop_price", precision = 16, scale = 8)
     private BigDecimal stopPrice;         // usado em Stop-Limit ou Stop Market
 
     @Column(name = "trailing_delta", precision = 5, scale = 2)
     private BigDecimal trailingDelta;     // ex: 1.5 (%) para trailing stop
-
-    // ================================
 
     @Column(name = "stop_loss_perc", precision = 5, scale = 2)
     private BigDecimal stopLossPerc;

@@ -34,7 +34,7 @@ public class AuthController {
         }
         User user = userOpt.get();
 
-        // 2) compara senha crua com hash
+        // 2) compara senha com hash
         if (!BCrypt.checkpw(req.getPassword(), user.getPasswordHash())) {
             // retorna 401 + {"password":"Senha incorreta"}
             return ResponseEntity

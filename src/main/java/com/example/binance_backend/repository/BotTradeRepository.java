@@ -23,9 +23,7 @@ public interface BotTradeRepository extends JpaRepository<BotTrade, UUID> {
             @Param("symbol") String symbol
     );
 
-    // Busca todos os trades (abertos e fechados) de um usuário, ordenados por data decrescente
     List<BotTrade> findByUserIdOrderByCreatedAtDesc(UUID userId);
 
-    // Caso prefira usar o objeto User diretamente
     List<BotTrade> findByUserOrderByCreatedAtDesc(User user);
 }
