@@ -4,6 +4,7 @@ import com.example.binance_backend.model.*;
 import com.example.binance_backend.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,8 @@ public class BotService {
     private final UserCredentialsRepository userCredentialsRepo;
     private final BinanceClient binanceClient;
 
+    @Autowired
+    private NotificationService notificationService;
 
     @Value("${bot.simulation:true}")
     private boolean simulationMode;
@@ -171,6 +174,12 @@ public class BotService {
                 }
             } else {
                 logger.info("Compra desaconselhada.");
+                logger.info("Token do utilizador {}: {}", user.getId(), user.getFcmToken());
+                notificationService.sendPushNotification(
+                        user,
+                        "🔍 Compra desaconselhada",
+                        "O bot analisou " + symbol + " mas os indicadores não recomendam compra."
+                );
             }
         }
     }
@@ -204,6 +213,14 @@ public class BotService {
 
         logger.info("[SIMULACAO] Custo total: {}", cost.setScale(2, RoundingMode.HALF_UP));
         logger.info("[SIMULACAO] Novo saldo do utilizador: {}", newBalance.setScale(2, RoundingMode.HALF_UP));
+
+        // Enviar notificação push
+        notificationService.sendPushNotification(
+                user,
+                "📈 Compra simulada realizada",
+                "O bot comprou " + amount.setScale(6, RoundingMode.HALF_UP) + " de " + symbol +
+                        " a " + entryPrice.setScale(2, RoundingMode.HALF_UP) + "$"
+        );
 
     }
 
@@ -279,6 +296,12 @@ public class BotService {
         user.setBalance(newBalance);
         userRepo.save(user);
 
+        // Enviar notificação push
+        notificationService.sendPushNotification(
+                user,
+                "💰 Venda simulada concluída",
+                "Lucro/prejuízo: " + profit.setScale(2, RoundingMode.HALF_UP) + "$ (" + reason + ")"
+        );
     }
 
     private void closeTrade(

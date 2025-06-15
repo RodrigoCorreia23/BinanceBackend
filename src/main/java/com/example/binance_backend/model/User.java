@@ -24,11 +24,8 @@ public class User {
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
-    // ---------------- ALTERAÇÃO AQUI ----------------
-    // Antes: private float balance = 0.0f;
     @Column(name = "balance", nullable = false, precision = 18, scale = 8)
     private BigDecimal balance = BigDecimal.ZERO;
-    // ------------------------------------------------
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -38,28 +35,63 @@ public class User {
     @Column(name = "updated_at", nullable = false)
     private OffsetDateTime updatedAt;
 
+    @Column(length = 500)
+    private String fcmToken;
+
     // Getters e Setters
-    public UUID getId() { return id; }
-    public void setId(UUID id) { this.id = id; }
+    public UUID getId() {
+        return id;
+    }
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    public void setId(UUID id) {
+        this.id = id;
+    }
 
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
+    public String getEmail() {
+        return email;
+    }
 
-    public String getPasswordHash() { return passwordHash; }
-    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
-    // ---------------- ALTERAÇÃO AQUI ----------------
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+
     public BigDecimal getBalance() {
         return balance;
     }
+
     public void setBalance(BigDecimal balance) {
         this.balance = balance;
     }
-    // ------------------------------------------------
 
-    public OffsetDateTime getCreatedAt() { return createdAt; }
-    public OffsetDateTime getUpdatedAt() { return updatedAt; }
+    public OffsetDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public OffsetDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public String getFcmToken() {
+        return fcmToken;
+    }
+
+    public void setFcmToken(String fcmToken) {
+        this.fcmToken = fcmToken;
+    }
 }

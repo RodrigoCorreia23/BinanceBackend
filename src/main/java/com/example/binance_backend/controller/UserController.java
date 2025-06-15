@@ -153,4 +153,38 @@ public ResponseEntity<?> getUserProfile(@PathVariable("id") String userId) {
             .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Map.of("message", "User não encontrado")));
     }
+
+    //
+    @PutMapping("/{id}/fcm-token")
+    public ResponseEntity<?> updateFcmToken(
+            @PathVariable String id,
+            @RequestBody Map<String, String> body
+    ) {
+        UUID uuid;
+        try {
+            uuid = UUID.fromString(id);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", "ID de utilizador inválido"));
+        }
+
+        Optional<User> optUser = userRepo.findById(uuid);
+        if (optUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "Utilizador não encontrado"));
+        }
+
+        String token = body.get("token");
+        if (token == null || token.isBlank()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", "Token FCM inválido"));
+        }
+
+        User user = optUser.get();
+        user.setFcmToken(token);
+        userRepo.save(user);
+
+        return ResponseEntity.ok("Token FCM atualizado com sucesso");
+    }
+
 }
