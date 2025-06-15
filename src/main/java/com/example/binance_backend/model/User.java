@@ -79,14 +79,6 @@ public class User {
         this.balance = balance;
     }
 
-    public OffsetDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public OffsetDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
     public String getFcmToken() {
         return fcmToken;
     }
